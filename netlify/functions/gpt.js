@@ -9,6 +9,6 @@ export const handler = async (event) => {
   const completion = await openai.createChatCompletion(JSON.parse(event.body));
   return {
     statusCode: 200,
-    body: JSON.stringify(completion),
+    body: JSON.stringify(completion.data),
   };
 };
