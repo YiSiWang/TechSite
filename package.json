@@ -18,10 +18,12 @@
     "export": "next export"
   },
   "dependencies": {
+    "@antv/g6": "^4.8.9",
     "cypress": "^10.0.3",
     "next": "^12.1.4",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "undici": "^5.21.2"
   },
   "devDependencies": {
     "netlify-plugin-cypress": "2.2.1"
