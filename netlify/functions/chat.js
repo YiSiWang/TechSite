@@ -1,11 +1,14 @@
-import encryptedPrompt from './encryptedPrompt.json';
-
 const { Configuration, OpenAIApi } = require("openai");
-
 const configuration = new Configuration({
   apiKey: process.env.OPEN_AI,
 });
 const openai = new OpenAIApi(configuration);
+
+const crypto = require('crypto');
+import encryptedPrompt from './encryptedPrompt.json';
+const ALGORITHM = 'aes-256-cbc';
+const IV_LENGTH = 16;
+const prompt = decrypt(process.env.ENCRYPT_KEY, encryptedPrompt[0]);
 
 function decrypt(key, text) {
   const textParts = text.split(':');
@@ -16,7 +19,6 @@ function decrypt(key, text) {
   decrypted = Buffer.concat([decrypted, decipher.final()]);
   return decrypted.toString();
 }
-const prompt = decrypt(process.env.ENCRYPT_KEY, encryptedPrompt[0]);
 
 export const handler = async (event) => {
   const params = JSON.parse(event.body);
