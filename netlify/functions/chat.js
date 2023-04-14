@@ -23,23 +23,23 @@ const prompt = decrypt(process.env.ENCRYPT_KEY, encryptedPrompt[0]);
 
 export const handler = async (event) => {
   const params = JSON.parse(event.body);
-  const completion = await openai.createChatCompletion(JSON.parse(event.body));
+  const completion = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: [
+      {
+        role: 'system',
+        content: prompt,
+      },
+      ...params.messages.map(msg => {
+        return {
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content,
+        }
+      }),
+    ],
+  });
   return {
     statusCode: 200,
-    body: JSON.stringify({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: 'system',
-          content: prompt,
-        },
-        ...params.messages.map(msg => {
-          return {
-            role: msg.role === 'user' ? 'user' : 'assistant',
-            content: msg.content,
-          }
-        }),
-      ],
-    }),
+    body: JSON.stringify(completion.data),
   };
 };
