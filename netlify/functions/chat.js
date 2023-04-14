@@ -25,17 +25,20 @@ export const handler = async (event) => {
   const completion = await openai.createChatCompletion(JSON.parse(event.body));
   return {
     statusCode: 200,
-    body: JSON.stringify([
-      {
-        role: 'system',
-        content: prompt,
-      },
-      ...params.messages.map(msg => {
-        return {
-          role: msg.role === 'user' ? 'user' : 'assistant',
-          content: msg.content,
-        }
-      }),
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: 'system',
+          content: prompt,
+        },
+        ...params.messages.map(msg => {
+          return {
+            role: msg.role === 'user' ? 'user' : 'assistant',
+            content: msg.content,
+          }
+        }),
+      ],
     ]),
   };
 };
