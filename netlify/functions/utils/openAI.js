@@ -1,6 +1,7 @@
 // https://github.com/ddiu8081/chatgpt-demo/blob/main/src/utils/openAI.ts
 
 import { createParser } from 'eventsource-parser'
+import { ReadableStream } from 'stream/web';
 
 export const generatePayload = (apiKey, messages) => ({
   headers: {
