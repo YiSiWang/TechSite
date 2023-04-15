@@ -1,14 +1,9 @@
-const { Configuration, OpenAIApi } = require("openai");
-const crypto = require('crypto');
-const encryptedPrompt = require('./encryptedPrompt.json');
-
-const configuration = new Configuration({
-  apiKey: process.env.OPEN_AI,
-});
-const openai = new OpenAIApi(configuration);
+import crypto from 'crypto';
+import { fetch } from 'undici';
+import encryptedPrompt from './encryptedPrompt.json';
+import { generatePayload, parseOpenAIStream } from './utils/openAI';
 
 const ALGORITHM = 'aes-256-cbc';
-const IV_LENGTH = 16;
 function decrypt(key, text) {
   const textParts = text.split(':');
   const iv = Buffer.from(textParts.shift(), 'hex');
@@ -18,28 +13,31 @@ function decrypt(key, text) {
   decrypted = Buffer.concat([decrypted, decipher.final()]);
   return decrypted.toString();
 }
-
 const prompt = decrypt(process.env.ENCRYPT_KEY, encryptedPrompt[0]);
 
 export const handler = async (event) => {
   const params = JSON.parse(event.body);
-  const completion = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    messages: [
-      {
-        role: 'system',
-        content: prompt,
+  const initOptions = generatePayload(apiKey, [
+    {
+      role: 'system',
+      content: prompt,
+    },
+    ...params.messages.map(msg => {
+      return {
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content,
+      }
+    }),
+  ]);
+  const response = await fetch(`https://api.openai.com/v1/chat/completions`, initOptions).catch((err) => {
+    console.error(err);
+    return new Response(JSON.stringify({
+      error: {
+        code: err.name,
+        message: err.message,
       },
-      ...params.messages.map(msg => {
-        return {
-          role: msg.role === 'user' ? 'user' : 'assistant',
-          content: msg.content,
-        }
-      }),
-    ],
+    }), { status: 500 })
   });
-  return {
-    statusCode: 200,
-    body: JSON.stringify(completion.data),
-  };
+
+  return parseOpenAIStream(response);
 };
