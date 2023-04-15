@@ -20,6 +20,7 @@
   "dependencies": {
     "@antv/g6": "^4.8.9",
     "cypress": "^10.0.3",
+    "eventsource-parser": "^1.0.0",
     "next": "^12.1.4",
     "openai": "^3.2.1",
     "react": "^18.0.0",
